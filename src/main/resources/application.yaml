@@ -1,0 +1,16 @@
+server:
+  port: 1234
+
+spring:
+  application:
+    name: steward
+  profiles:
+    active: dev
+
+logging:
+  file:
+    name: steward.log
+
+steward:
+  profiles:
+    active: dev

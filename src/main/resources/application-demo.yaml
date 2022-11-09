@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    dynamic:
+      primary: multilogin
+      datasource:
+        multilogin:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/multilogin
+          username: root
+          password: root
+        blessingskin:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/blessingskin?zeroDateTimeBehavior=convertToNull
+          username: root
+          password: root
+
+steward:
+  profiles:
+  listen-group-id:
+  report-group-id:
+  player-id-limit:
+  request-level:
