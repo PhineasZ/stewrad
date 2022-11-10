@@ -15,8 +15,30 @@ spring:
           password: root
 
 steward:
-  profiles:
-  listen-group-id:
-  report-group-id:
-  player-id-limit:
-  request-level:
+  server:
+    # 后端服务端口
+    port:
+    # 管理群号码
+    listen-group-id:
+    # 日志群号码
+    report-group-id:
+    # 群名片中角色数量限制
+    player-id-limit: 2
+    # 入群等级门槛
+    request-level: 16
+  # 管理群的返回消息，$为替换符号
+  message:
+    # 白名单添加成功
+    success: "白名单$添加成功，请使用[官方启动器]或[第三方启动器外置登录]。设置教程：https://oldtimes.club/login-support/"
+    # 玩家中心没有角色
+    player-not-found: "玩家中心不存在$，请前往 https://mc.oldtimes.club/ 注册。群名片与游戏角色名大小写需完全一致"
+    # 已拥有白名单
+    whitelist-already-exists: "$已拥有白名单。若仍然无法登陆，请检查是否设置外置登录。设置教程：https://oldtimes.club/login-support/"
+    # 群名片中没有合规角色名
+    no-legal-name: "请设置群名片为游戏角色名称。群名片与游戏角色名大小写需完全一致"
+    # 超出群名片中角色数量限制
+    out-of-limit: "$超出角色设置数量限制[$]，请合理设置角色数量"
+    # 白名单查询时没有白名单
+    no-whitelist: "[$]未拥有白名单，请发送\"白名单\"进行更新"
+    # 黑名单彩蛋
+    fake-blacklist: "[$]已加入黑名单，V50即刻解封"

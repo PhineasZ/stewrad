@@ -152,18 +152,18 @@ public class GroupServiceImpl implements GroupService {
                 } catch (JsonProcessingException e) {
                   throw new RuntimeException(e);
                 }
-                message =
-                    "白名单添加"
-                        + data
-                        + "成功，请使用[官方启动器]或[第三方启动器外置登录]。设置教程：https://oldtimes.club/login-support/";
+                message = strUtil.splice(config.getSuccess(), data);
               }
-              case PLAYER_NOT_FOUND -> message =
-                  "玩家中心不存在" + data + "，请前往 https://mc.oldtimes.club/ 注册。群名片与游戏角色名大小写需完全一致";
+              case PLAYER_NOT_FOUND -> message = strUtil.splice(config.getPlayerNotFound(), data);
               case WHITELIST_ALREADY_EXISTS -> message =
-                  data + "已拥有白名单。若仍然无法登陆，请检查是否设置外置登录。设置教程：https://oldtimes.club/login-support/";
-              case NO_LEGAL_NAME -> message = "请设置群名片为游戏角色名称。群名片与游戏角色名大小写需完全一致";
-              case OUT_OF_LIMIT -> message =
-                  data + "超出角色设置数量限制[" + config.getIdLimit() + "]，请合理设置角色数量";
+                  strUtil.splice(config.getWhitelistAlreadyExists(), data);
+              case NO_LEGAL_NAME -> message = config.getNoLegalName();
+              case OUT_OF_LIMIT -> {
+                val list = new ArrayList<>();
+                list.add(data);
+                list.add(config.getIdLimit());
+                message = strUtil.splice(config.getOutOfLimit(), list);
+              }
               default -> message = "未知分支";
             }
             try {
@@ -297,7 +297,7 @@ public class GroupServiceImpl implements GroupService {
                         try {
                           apiUtil.sendAt(
                               ctx,
-                              "[" + name + "]未拥有白名单，请发送\"白名单\"进行更新",
+                              strUtil.splice(config.getNoWhitelist(), name),
                               legalNameUserIdMap.get(name));
                         } catch (JsonProcessingException e) {
                           throw new RuntimeException(e);
@@ -376,20 +376,27 @@ public class GroupServiceImpl implements GroupService {
    * @param event 事件
    */
   private void listenGroupMessage(ChannelHandlerContext ctx, Event event) {
-    if (WHITELIST.equals(event.getMessage())) {
-      // 白名单请求
-      String message = "[" + event.getUserId() + "]请求更新白名单：" + event.getSender().getCard();
-      log.info(message);
-      try {
+    try {
+      if (WHITELIST.equals(event.getMessage())) {
+        // 白名单请求
+        String message = "[" + event.getUserId() + "]请求更新白名单：" + event.getSender().getCard();
+        log.info(message);
         apiUtil.sendLog(ctx, message);
-      } catch (JsonProcessingException e) {
-        log.error(e.getMessage());
+        flushWhitelist(ctx);
+        addWhitelist(ctx, event);
+      } else if (event.getMessage().contains("有白名单吗")) {
+        flushWhitelist(ctx);
+        checkWhitelist(ctx, event);
+      } else if ("黑名单".equals(event.getMessage())) {
+        // 黑名单彩蛋
+        apiUtil.sendGroupReply(
+            ctx,
+            String.valueOf(event.getMessageId()),
+            strUtil.splice(config.getFakeBlacklist(), event.getUserId()),
+            event.getUserId());
       }
-      flushWhitelist(ctx);
-      addWhitelist(ctx, event);
-    } else if (event.getMessage().contains("有白名单吗")) {
-      flushWhitelist(ctx);
-      checkWhitelist(ctx, event);
+    } catch (JsonProcessingException e) {
+      log.error(e.getMessage());
     }
   }
 

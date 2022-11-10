@@ -6,6 +6,7 @@ import cc.mousse.steward.common.Receipt;
 import cc.mousse.steward.server.handler.EventHandler;
 import cc.mousse.steward.server.handler.ReceiptHandler;
 import cc.mousse.steward.utils.ApiUtil;
+import cc.mousse.steward.utils.StrUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelHandlerContext;
@@ -30,7 +31,6 @@ import javax.annotation.Resource;
 import java.util.Objects;
 
 import static cc.mousse.steward.common.Constant.*;
-import static cc.mousse.steward.utils.StrUtil.*;
 
 /**
  * 消息入口
@@ -43,6 +43,8 @@ public class Gateway {
 
   @Resource private Config config;
   @Resource private ApiUtil apiUtil;
+
+  @Resource private StrUtil strUtil;
   @Resource private EventHandler eventHandler;
   @Resource private ReceiptHandler receiptHandler;
 
@@ -83,7 +85,7 @@ public class Gateway {
                             val jsonNode = mapper.readTree(text);
                             val eventType = jsonNode.get("meta_event_type");
                             if (eventType != null) {
-                              val metaEventType = removeQuotes(eventType.toString());
+                              val metaEventType = strUtil.removeQuotes(eventType.toString());
                               if (Objects.equals(LIFE_CYCLE, metaEventType)) {
                                 val message = "前后端已同步";
                                 log.info(message);

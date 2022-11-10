@@ -60,11 +60,11 @@ public class StrUtil {
     return names;
   }
 
-  private static boolean wordLegalCheck(char c) {
+  private boolean wordLegalCheck(char c) {
     return c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || c == '_';
   }
 
-  public static String removeQuotes(String s) {
+  public String removeQuotes(String s) {
     if (s != null) {
       if (s.charAt(0) == QUOTE) {
         s = s.substring(1);
@@ -74,5 +74,32 @@ public class StrUtil {
       }
     }
     return s;
+  }
+
+  public <T> String splice(String s, List<T> data) {
+    StringBuilder builder = new StringBuilder();
+    val strs = s.split("\\$");
+    val iter = data.iterator();
+    for (String str : strs) {
+      builder.append(str);
+      if (iter.hasNext()) {
+        builder.append(iter.next());
+      }
+    }
+    return builder.toString();
+  }
+
+  public <T> String splice(String s, T data) {
+    StringBuilder builder = new StringBuilder();
+    val strs = s.split("\\$");
+    boolean usedFlag = false;
+    for (String str : strs) {
+      builder.append(str);
+      if (!usedFlag) {
+        builder.append(data);
+        usedFlag = true;
+      }
+    }
+    return builder.toString();
   }
 }
