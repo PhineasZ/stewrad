@@ -31,7 +31,7 @@ public class Result {
   public static Result fail(String name) {
     val set = new HashSet<String>();
     set.add(name);
-    return new Result(Status.FAIL, null, set);
+    return new Result(Status.FAIL, Cause.FAIL, set);
   }
 
   public static Result playerNotFound(String name) {
@@ -72,12 +72,14 @@ public class Result {
   public enum Cause {
     /**
      * SUCCESS：添加成功<br>
+     * FAIL：添加失败<br>
      * PLAYER_NOT_FOUND：BlessingSkin找不到玩家<br>
      * WHITELIST_ALREADY_EXISTS：白名单已经存在<br>
      * NO_LEGAL_NAME：没有合规角色名<br>
      * OUT_OF_LIMIT：超出数量限制
      */
     SUCCESS,
+    FAIL,
     PLAYER_NOT_FOUND,
     WHITELIST_ALREADY_EXISTS,
     NO_LEGAL_NAME,

@@ -121,11 +121,7 @@ public class GroupServiceImpl implements GroupService {
       val names = strUtil.getLegal(groupMember.getCard());
       // 超出数量限制的角色名
       for (String illegalName : names.get(1)) {
-        if (!results.containsKey(Result.Cause.OUT_OF_LIMIT)) {
-          results.put(Result.Cause.OUT_OF_LIMIT, Result.outOfLimit(illegalName));
-        } else {
-          results.get(Result.Cause.OUT_OF_LIMIT).appendData(illegalName);
-        }
+        putResults(results, Result.outOfLimit(illegalName));
       }
       val legalNames = names.get(0);
       if (legalNames != null && legalNames.size() != 0) {
@@ -135,11 +131,7 @@ public class GroupServiceImpl implements GroupService {
           // 查看blessingsink.player是否存在该角色
           if (playerService.getOneByName(legalName) == null) {
             // blessingsink.player不存在角色
-            if (!results.containsKey(Result.Cause.PLAYER_NOT_FOUND)) {
-              results.put(Result.Cause.PLAYER_NOT_FOUND, Result.playerNotFound(legalName));
-            } else {
-              results.get(Result.Cause.PLAYER_NOT_FOUND).appendData(legalName);
-            }
+            putResults(results, Result.playerNotFound(legalName));
             continue;
           }
           addWhitelist(results, legalName);
@@ -160,13 +152,16 @@ public class GroupServiceImpl implements GroupService {
                 } catch (JsonProcessingException e) {
                   throw new RuntimeException(e);
                 }
-                message = "白名单添加" + data + "成功";
+                message =
+                    "白名单添加"
+                        + data
+                        + "成功，请使用[官方启动器]或[第三方启动器外置登录]。设置教程：https://oldtimes.club/login-support/";
               }
               case PLAYER_NOT_FOUND -> message =
-                  "玩家中心不存在" + data + "，请前往 https://mc.oldtimes.club/ 注册";
+                  "玩家中心不存在" + data + "，请前往 https://mc.oldtimes.club/ 注册。群名片与游戏角色名大小写需完全一致";
               case WHITELIST_ALREADY_EXISTS -> message =
                   data + "已拥有白名单。若仍然无法登陆，请检查是否设置外置登录。设置教程：https://oldtimes.club/login-support/";
-              case NO_LEGAL_NAME -> message = "请设置群名片为游戏角色名称";
+              case NO_LEGAL_NAME -> message = "请设置群名片为游戏角色名称。群名片与游戏角色名大小写需完全一致";
               case OUT_OF_LIMIT -> message =
                   data + "超出角色设置数量限制[" + config.getIdLimit() + "]，请合理设置角色数量";
               default -> message = "未知分支";
@@ -199,17 +194,9 @@ public class GroupServiceImpl implements GroupService {
       if (userData.getWhitelist() != 1) {
         userData.setWhitelist(1);
         userDataService.updateOne(userData);
-        if (!results.containsKey(Result.Cause.SUCCESS)) {
-          results.put(Result.Cause.SUCCESS, Result.success(name));
-        } else {
-          results.get(Result.Cause.SUCCESS).appendData(name);
-        }
+        putResults(results, Result.success(name));
       } else {
-        if (!results.containsKey(Result.Cause.WHITELIST_ALREADY_EXISTS)) {
-          results.put(Result.Cause.WHITELIST_ALREADY_EXISTS, Result.whitelistAlreadyExists(name));
-        } else {
-          results.get(Result.Cause.WHITELIST_ALREADY_EXISTS).appendData(name);
-        }
+        putResults(results, Result.whitelistAlreadyExists(name));
       }
       // 尝试删除multilogin.multilogin_cache_whitelist中的该条信息
       val cacheWhitelist = cacheWhitelistService.getOneByName(name);
@@ -220,18 +207,10 @@ public class GroupServiceImpl implements GroupService {
       // 查看multilogin.multilogin_cache_whitelist中是否有该条信息
       val cacheWhitelist = cacheWhitelistService.getOneByName(name);
       if (cacheWhitelist != null) {
-        if (!results.containsKey(Result.Cause.WHITELIST_ALREADY_EXISTS)) {
-          results.put(Result.Cause.WHITELIST_ALREADY_EXISTS, Result.whitelistAlreadyExists(name));
-        } else {
-          results.get(Result.Cause.WHITELIST_ALREADY_EXISTS).appendData(name);
-        }
+        putResults(results, Result.whitelistAlreadyExists(name));
       } else {
         cacheWhitelistService.addOne(new CacheWhitelist(name));
-        if (!results.containsKey(Result.Cause.SUCCESS)) {
-          results.put(Result.Cause.SUCCESS, Result.success(name));
-        } else {
-          results.get(Result.Cause.SUCCESS).appendData(name);
-        }
+        putResults(results, Result.success(name));
       }
     }
   }
@@ -276,23 +255,16 @@ public class GroupServiceImpl implements GroupService {
   private void checkWhitelist(ChannelHandlerContext ctx, Event event) {
     // 获取所有有效角色名
     val legalNames = strUtil.getLegal(event.getMessage(), false);
-    val results = new EnumMap<Result.Status, Result>(Result.Status.class);
+    val results = new EnumMap<Result.Cause, Result>(Result.Cause.class);
     for (String legalName : legalNames.get(0)) {
       // 查询multilogin.multilogin_user_data和multilogin.multilogin_cache_whitelist表
       val userData = userDataService.getOneByName(legalName);
-      if ((userData != null && userData.getWhitelist() == 1)
-          || cacheWhitelistService.getOneByName(legalName) != null) {
-        if (!results.containsKey(Result.Status.SUCCESS)) {
-          results.put(Result.Status.SUCCESS, Result.whitelistAlreadyExists(legalName));
-        } else {
-          results.get(Result.Status.SUCCESS).appendData(legalName);
-        }
+      if (userData != null && userData.getWhitelist() == 1) {
+        putResults(results, Result.success(legalName));
+      } else if (cacheWhitelistService.getOneByName(legalName) != null) {
+        putResults(results, Result.success(legalName));
       } else {
-        if (!results.containsKey(Result.Status.FAIL)) {
-          results.put(Result.Status.FAIL, Result.whitelistAlreadyExists(legalName));
-        } else {
-          results.get(Result.Status.FAIL).appendData(legalName);
-        }
+        putResults(results, Result.fail(legalName));
       }
     }
     try {
@@ -302,7 +274,7 @@ public class GroupServiceImpl implements GroupService {
       for (GroupMember groupMember : groupMembers) {
         val names = strUtil.getLegal(groupMember.getCard(), false).get(0);
         for (String name : names) {
-          if (results.get(Result.Status.FAIL).getData().contains(name)) {
+          if (results.get(Result.Cause.FAIL).getData().contains(name)) {
             legalNameUserIdMap.put(name, groupMember.getUserId());
           }
         }
@@ -346,6 +318,15 @@ public class GroupServiceImpl implements GroupService {
     }
   }
 
+  private void putResults(EnumMap<Result.Cause, Result> results, Result result) {
+    val cause = result.getCause();
+    if (!results.containsKey(cause)) {
+      results.put(cause, result);
+    } else {
+      result.getData().forEach(data -> results.get(cause).appendData(data));
+    }
+  }
+
   @Override
   public void memberDecrease(ChannelHandlerContext ctx, Event event) {
     flushWhitelist(ctx);
@@ -362,20 +343,21 @@ public class GroupServiceImpl implements GroupService {
       log.error(e.getMessage());
       Thread.currentThread().interrupt();
     }
-    //TODO 改群名片有Bug
+    // TODO 改群名片有Bug
     /*
-    try {
-      val userId = event.getUserId();
-      val groupMember = apiUtil.getGroupMemberInfo(ctx, userId);
-      apiUtil.setGroupCard(ctx, userId, groupMember.getNickName());
-      log.info("设置[{}]群名片：{}", event.getUserId(), apiUtil.getGroupMemberInfo(ctx, userId).getCard());
-    } catch (InterruptedException e) {
-      log.error(e.getMessage());
-      Thread.currentThread().interrupt();
-    } catch (Exception e) {
-      log.error(e.getMessage());
-    }
-    */
+       try {
+         val userId = event.getUserId();
+         val groupMember = apiUtil.getGroupMemberInfo(ctx, userId);
+         apiUtil.setGroupCard(ctx, userId, groupMember.getNickName());
+         log.info("设置[{}]群名片：{}", event.getUserId(), apiUtil.getGroupMemberInfo(ctx,
+    userId).getCard());
+       } catch (InterruptedException e) {
+         log.error(e.getMessage());
+         Thread.currentThread().interrupt();
+       } catch (Exception e) {
+         log.error(e.getMessage());
+       }
+       */
   }
 
   @Override
@@ -462,8 +444,7 @@ public class GroupServiceImpl implements GroupService {
               event.getFlag(),
               event.getSubType(),
               false,
-              "玩家等级需≥" + config.getRequestLevel() + "。可由群中成员邀请"
-              );
+              "玩家等级需≥" + config.getRequestLevel() + "。可由群中成员邀请");
           apiUtil.sendLog(ctx, "拒绝[" + userId + "]入群请求，等级：" + stranger.getLevel());
         }
       }
