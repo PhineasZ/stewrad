@@ -14,18 +14,18 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Sender {
-  String age;
-  Object area;
-  String card;
-  Integer level;
-  String nickname;
-  String role;
-  String sex;
-  String title;
+  private String age;
+  private Object area;
+  private String card;
+  private Integer level;
+  private String nickname;
+  private String role;
+  private String sex;
+  private String title;
 
   @JsonProperty("group_id")
-  String groupId;
+  private String groupId;
 
   @JsonProperty("user_id")
-  String userId;
+  private String userId;
 }

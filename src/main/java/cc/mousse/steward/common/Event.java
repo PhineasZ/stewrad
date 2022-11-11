@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.ToString;
 
+
 /**
  * 事件消息
  *
@@ -23,6 +24,9 @@ public class Event {
   /** 收到事件的机器人的QQ号 */
   @JsonProperty("self_id")
   private String selfId;
+
+  @JsonProperty("self_tiny_id")
+  private String selfTinyId;
   /** 事件发生的时间戳 */
   private Long time;
   /** 表示该上报的类型，消息，请求，通知或元事件 */
@@ -56,7 +60,7 @@ public class Event {
   private String comment;
   /** 请求flag，在调用处理请求的API时需要传入 */
   private String flag;
-
+  /** 群成员/陌生人信息 */
   private GroupMember groupMember;
   /** 临时会话来源 */
   @JsonProperty("temp_source")
@@ -64,6 +68,12 @@ public class Event {
   /** 群号 */
   @JsonProperty("group_id")
   private String groupId;
+  /** 戳一戳发送者QQ号 */
+  @JsonProperty("sender_id")
+  private String senderId;
+  /** 戳一戳被戳者QQ号 */
+  @JsonProperty("target_id")
+  private String targetId;
   /** 匿名信息，如果不是匿名消息则为null */
   private String anonymous;
   /** 新名片 */
@@ -72,10 +82,15 @@ public class Event {
   /** 旧名片 */
   @JsonProperty("card_old")
   private String cardOld;
-  /** post_type为request的上报会有以下有效通用数据 */
+  /** 请求类型 */
   @JsonProperty("request_type")
   private String requestType;
-  /** post_type为request的上报会有以下有效通用数据 */
+  /** 通知类型 */
   @JsonProperty("notice_type")
   private String noticeType;
+  /** 荣誉类型 */
+  @JsonProperty("honor_type")
+  private String honorType;
+  /** 文件信息 */
+  private File file;
 }

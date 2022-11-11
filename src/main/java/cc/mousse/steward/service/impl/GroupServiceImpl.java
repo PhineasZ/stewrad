@@ -460,4 +460,13 @@ public class GroupServiceImpl implements GroupService {
       Thread.currentThread().interrupt();
     }
   }
+
+  @Override
+  public void groupRecall(ChannelHandlerContext ctx, Event event) {
+  }
+
+  @Override
+  public void groupUpload(ChannelHandlerContext ctx, Event event) {
+
+  }
 }

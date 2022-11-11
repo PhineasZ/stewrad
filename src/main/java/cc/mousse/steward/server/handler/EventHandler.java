@@ -59,6 +59,10 @@ public class EventHandler extends SimpleChannelInboundHandler<Event> {
                 case "group_decrease" -> groupService.memberDecrease(ctx, event);
                   // 群成员增加
                 case "group_increase" -> groupService.memberIncrease(ctx, event);
+                  // 群消息撤回
+                case "group_recall" -> groupService.groupRecall(ctx, event);
+                  // 群文件上传
+                case "group_upload" -> groupService.groupUpload(ctx, event);
                 default -> unknownEvent(event);
               }
             }

@@ -44,4 +44,20 @@ public interface GroupService {
    * @param event 事件对象
    */
   void memberJoinRequest(ChannelHandlerContext ctx, Event event);
+
+  /**
+   * 群成员撤回消息
+   *
+   * @param ctx 上下文环境
+   * @param event 事件对象
+   */
+  void groupRecall(ChannelHandlerContext ctx, Event event);
+
+  /**
+   * 群文件上传
+   *
+   * @param ctx 上下文环境
+   * @param event 事件对象
+   */
+  void groupUpload(ChannelHandlerContext ctx, Event event);
 }
