@@ -329,11 +329,17 @@ public class GroupServiceImpl implements GroupService {
 
   @Override
   public void memberDecrease(ChannelHandlerContext ctx, Event event) {
+    if (!config.getListenGroupId().equals(event.getGroupId())) {
+      return;
+    }
     flushWhitelist(ctx);
   }
 
   @Override
   public void memberIncrease(ChannelHandlerContext ctx, Event event) {
+    if (!config.getListenGroupId().equals(event.getGroupId())) {
+      return;
+    }
     flushWhitelist(ctx);
     log.info("[{}]加入本群", event.getUserId());
     // @Q群管家
@@ -437,14 +443,20 @@ public class GroupServiceImpl implements GroupService {
     try {
       // 主动加群
       if (ADD.equals(event.getSubType())) {
+        // 补充comment字段防止空指针
+        if (event.getComment() == null) {
+          event.setComment("");
+        }
+        // 拼接答案与回答
+        val prefixAnswer = "问题：" + config.getQuestion() + "\n答案：";
+        val correctAnswer = prefixAnswer + config.getAnswer();
+        val strangerAnswer = event.getComment().substring(prefixAnswer.length());
         val userId = event.getUserId();
         // 查询用户等级
         val stranger = apiUtil.getStrangerInfo(ctx, userId);
         log.info("flag：{}", event.getFlag());
-        if (stranger.getLevel() >= config.getRequestLevel()) {
-          log.info("同意入群请求：{}", event.getUserId());
-          apiUtil.setGroupAddRequest(ctx, event.getFlag(), event.getSubType(), true, "");
-        } else {
+        if (stranger.getLevel() < config.getRequestLevel()) {
+          // 等级不足，拒绝
           log.warn("不同意入群请求：{}", userId);
           apiUtil.setGroupAddRequest(
               ctx,
@@ -453,6 +465,15 @@ public class GroupServiceImpl implements GroupService {
               false,
               "玩家等级需≥" + config.getRequestLevel() + "。可由群中成员邀请");
           apiUtil.sendLog(ctx, "拒绝[" + userId + "]入群请求，等级：" + stranger.getLevel());
+        } else if (config.isEnableVerify() && !correctAnswer.equals(event.getComment())) {
+          // 开启加群验证且答案错误
+          log.warn("不同意入群请求：{}", userId);
+          apiUtil.setGroupAddRequest(
+              ctx, event.getFlag(), event.getSubType(), false, "回答错误，请输入：" + config.getAnswer());
+          apiUtil.sendLog(ctx, "拒绝[" + userId + "]入群请求，回答：" + strangerAnswer);
+        } else {
+          log.info("同意入群请求：{}", event.getUserId());
+          apiUtil.setGroupAddRequest(ctx, event.getFlag(), event.getSubType(), true, "");
         }
       }
     } catch (Exception e) {
@@ -462,11 +483,8 @@ public class GroupServiceImpl implements GroupService {
   }
 
   @Override
-  public void groupRecall(ChannelHandlerContext ctx, Event event) {
-  }
+  public void groupRecall(ChannelHandlerContext ctx, Event event) {}
 
   @Override
-  public void groupUpload(ChannelHandlerContext ctx, Event event) {
-
-  }
+  public void groupUpload(ChannelHandlerContext ctx, Event event) {}
 }

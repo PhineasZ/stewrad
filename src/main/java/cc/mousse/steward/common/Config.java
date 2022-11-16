@@ -13,80 +13,48 @@ import org.springframework.stereotype.Component;
 @Component
 public class Config {
 
+  @Value("${steward.server.port}")
   private int serverPort;
-  private int idLimit;
-  private int requestLevel;
-  private String reportGroupId;
+
+  @Value("${steward.server.listen-group.id}")
   private String listenGroupId;
 
-  private String success;
-  private String playerNotFound;
+  @Value("${steward.server.listen-group.player-id-limit}")
+  private int idLimit;
 
-  private String whitelistAlreadyExists;
-  private String noLegalName;
-  private String outOfLimit;
+  @Value("${steward.server.listen-group.request.level}")
+  private int requestLevel;
 
-  private String noWhitelist;
+  @Value("${steward.server.listen-group.request.enable-verify}")
+  private boolean enableVerify;
 
-  private String fakeBlacklist;
+  @Value("${steward.server.listen-group.request.question}")
+  private String question;
 
-  @Value("${steward.server.port}")
-  public void setServerPort(int serverPort) {
-    this.serverPort = serverPort;
-  }
+  @Value("${steward.server.listen-group.request.answer}")
+  private String answer;
 
-  @Value("${steward.server.player-id-limit}")
-  public void setIdLimit(int idLimit) {
-    this.idLimit = idLimit;
-  }
-
-  @Value("${steward.server.request-level}")
-  public void setRequestLevel(int requestLevel) {
-    this.requestLevel = requestLevel;
-  }
-
-  @Value("${steward.server.report-group-id}")
-  public void setReportGroupId(String reportGroupId) {
-    this.reportGroupId = reportGroupId;
-  }
-
-  @Value("${steward.server.listen-group-id}")
-  public void setListenGroupId(String listenGroupId) {
-    this.listenGroupId = listenGroupId;
-  }
+  @Value("${steward.server.report-group.id}")
+  private String reportGroupId;
 
   @Value("${steward.message.success}")
-  public void setSuccess(String success) {
-    this.success = success;
-  }
+  private String success;
 
   @Value("${steward.message.player-not-found}")
-  public void setPlayerNotFound(String playerNotFound) {
-    this.playerNotFound = playerNotFound;
-  }
-
-  @Value("${steward.message.no-legal-name}")
-  public void setNoLegalName(String noLegalName) {
-    this.noLegalName = noLegalName;
-  }
-
-  @Value("${steward.message.out-of-limit}")
-  public void setOutOfLimit(String outOfLimit) {
-    this.outOfLimit = outOfLimit;
-  }
+  private String playerNotFound;
 
   @Value("${steward.message.whitelist-already-exists}")
-  public void setWhitelistAlreadyExists(String whitelistAlreadyExists) {
-    this.whitelistAlreadyExists = whitelistAlreadyExists;
-  }
+  private String whitelistAlreadyExists;
+
+  @Value("${steward.message.no-legal-name}")
+  private String noLegalName;
+
+  @Value("${steward.message.out-of-limit}")
+  private String outOfLimit;
 
   @Value("${steward.message.no-whitelist}")
-  public void setNoWhitelist(String noWhitelist) {
-    this.noWhitelist = noWhitelist;
-  }
+  private String noWhitelist;
 
   @Value("${steward.message.fake-blacklist}")
-  public void setFakeBlacklist(String fakeBlacklist) {
-    this.fakeBlacklist = fakeBlacklist;
-  }
+  private String fakeBlacklist;
 }

@@ -100,12 +100,21 @@ public class Gateway {
                             // 判断消息类型
                             if (jsonNode.get(RETURN_CODE) != null) {
                               // 消息回执
-                              val receipt = mapper.readValue(text, Receipt.class);
-                              super.channelRead(ctx, receipt);
+                              try {
+                                val receipt = mapper.readValue(text, Receipt.class);
+                                super.channelRead(ctx, receipt);
+                              } catch (Exception e) {
+                                log.error(e.getMessage());
+                              }
                             } else {
                               // 事件消息
-                              val event = mapper.readValue(text, Event.class);
-                              super.channelRead(ctx, event);
+                              try{
+                                val event = mapper.readValue(text, Event.class);
+                                super.channelRead(ctx, event);
+                              } catch (Exception e) {
+                                log.error(e.getMessage());
+                              }
+
                             }
                           }
                         })
