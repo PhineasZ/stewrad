@@ -441,16 +441,17 @@ public class GroupServiceImpl implements GroupService {
   @Override
   public void memberJoinRequest(ChannelHandlerContext ctx, Event event) {
     try {
-      // 主动加群
       if (ADD.equals(event.getSubType())) {
         // 补充comment字段防止空指针
-        if (event.getComment() == null) {
-          event.setComment("");
-        }
+        val comment = event.getComment() == null ? "" : event.getComment();
         // 拼接答案与回答
-        val prefixAnswer = "问题：" + config.getQuestion() + "\n答案：";
-        val correctAnswer = prefixAnswer + config.getAnswer();
-        val strangerAnswer = event.getComment().substring(prefixAnswer.length());
+        val question = "问题：" + config.getQuestion() + "\n答案：";
+        if (!comment.startsWith(question)) {
+          // 不处理群成员邀请事件
+          return;
+        }
+        val correctAnswer = question + config.getAnswer();
+        val strangerAnswer = comment.substring(question.length());
         val userId = event.getUserId();
         // 查询用户等级
         val stranger = apiUtil.getStrangerInfo(ctx, userId);
