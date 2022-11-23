@@ -295,10 +295,13 @@ public class GroupServiceImpl implements GroupService {
                   data.forEach(
                       name -> {
                         try {
-                          apiUtil.sendAt(
-                              ctx,
-                              strUtil.splice(config.getNoWhitelist(), name),
-                              legalNameUserIdMap.get(name));
+                          // qq号不为空时才发送
+                          if (legalNameUserIdMap.get(name) != null) {
+                            apiUtil.sendAt(
+                                ctx,
+                                strUtil.splice(config.getNoWhitelist(), name),
+                                legalNameUserIdMap.get(name));
+                          }
                         } catch (JsonProcessingException e) {
                           throw new RuntimeException(e);
                         }

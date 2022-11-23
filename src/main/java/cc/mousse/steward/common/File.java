@@ -22,4 +22,6 @@ public class File {
   /** busid（目前不清楚有什么作用） */
   @JsonProperty("busid")
   private String busId;
+  /** 下载链接 */
+  private String url;
 }
