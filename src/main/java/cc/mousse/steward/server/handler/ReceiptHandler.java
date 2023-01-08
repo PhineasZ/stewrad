@@ -22,7 +22,7 @@ public class ReceiptHandler extends SimpleChannelInboundHandler<Receipt> {
 
   @Override
   protected void channelRead0(ChannelHandlerContext channelHandlerContext, Receipt receipt) {
-    log.debug("Receipt: {}", receipt);
+    log.debug("Receipt → {}", receipt);
     // 若echo信息匹配，则将回执加入集合
     if (receipt != null) {
       val echo = receipt.getEcho();

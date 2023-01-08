@@ -2,12 +2,12 @@ spring:
   application:
     name: steward
   profiles:
-    active: dev
+    active: pro
 
 logging:
-  file:
-    name: steward.log
+  profiles:
+    active: pro
 
 steward:
   profiles:
-    active: dev
+    active: pro

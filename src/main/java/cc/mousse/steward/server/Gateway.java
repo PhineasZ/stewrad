@@ -23,7 +23,6 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -43,15 +42,14 @@ public class Gateway {
 
   @Resource private Config config;
   @Resource private ApiUtil apiUtil;
-
   @Resource private StrUtil strUtil;
   @Resource private EventHandler eventHandler;
   @Resource private ReceiptHandler receiptHandler;
 
   public void start() {
-    val mapper = new ObjectMapper();
-    val leader = new NioEventLoopGroup();
-    val worker = new NioEventLoopGroup();
+    var mapper = new ObjectMapper();
+    var leader = new NioEventLoopGroup();
+    var worker = new NioEventLoopGroup();
     new ServerBootstrap()
         .group(leader, worker)
         .channel(NioServerSocketChannel.class)
@@ -80,14 +78,14 @@ public class Gateway {
                           protected void channelRead0(
                               ChannelHandlerContext ctx, TextWebSocketFrame textWebSocketFrame)
                               throws Exception {
-                            val text = textWebSocketFrame.text();
+                            var text = textWebSocketFrame.text();
                             // 判断事件类型
-                            val jsonNode = mapper.readTree(text);
-                            val eventType = jsonNode.get("meta_event_type");
+                            var jsonNode = mapper.readTree(text);
+                            var eventType = jsonNode.get("meta_event_type");
                             if (eventType != null) {
-                              val metaEventType = strUtil.removeQuotes(eventType.toString());
+                              var metaEventType = strUtil.removeQuotes(eventType.toString());
                               if (Objects.equals(LIFE_CYCLE, metaEventType)) {
-                                val message = "前后端已同步";
+                                var message = "前后端已同步";
                                 log.info(message);
                                 apiUtil.sendLog(ctx, message);
                                 return;
@@ -101,20 +99,19 @@ public class Gateway {
                             if (jsonNode.get(RETURN_CODE) != null) {
                               // 消息回执
                               try {
-                                val receipt = mapper.readValue(text, Receipt.class);
+                                var receipt = mapper.readValue(text, Receipt.class);
                                 super.channelRead(ctx, receipt);
                               } catch (Exception e) {
                                 log.error(e.getMessage());
                               }
                             } else {
                               // 事件消息
-                              try{
-                                val event = mapper.readValue(text, Event.class);
+                              try {
+                                var event = mapper.readValue(text, Event.class);
                                 super.channelRead(ctx, event);
                               } catch (Exception e) {
                                 log.error(e.getMessage());
                               }
-
                             }
                           }
                         })

@@ -1,10 +1,10 @@
 package cc.mousse.steward.common;
 
 import cc.mousse.steward.domain.GroupMember;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.ToString;
-
 
 /**
  * 事件消息
@@ -13,6 +13,7 @@ import lombok.ToString;
  */
 @Data
 @ToString
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Event {
 
   /** post_type为meta_event的上报会有以下有效数据 */
@@ -93,4 +94,7 @@ public class Event {
   private String honorType;
   /** 文件信息 */
   private File file;
+  /** 入群邀请者id */
+  @JsonProperty("invitor_id")
+  private String invitorId;
 }

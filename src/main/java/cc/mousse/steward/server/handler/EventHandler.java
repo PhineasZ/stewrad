@@ -6,6 +6,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -23,6 +24,7 @@ import static cc.mousse.steward.common.Constant.*;
  */
 @Slf4j
 @Component
+@Scope(value = "prototype")
 public class EventHandler extends SimpleChannelInboundHandler<Event> {
 
   /** 自定义线程池 */
@@ -47,7 +49,7 @@ public class EventHandler extends SimpleChannelInboundHandler<Event> {
     if (event.getUserId() != null && Objects.equals(event.getUserId(), event.getSelfId())) {
       return;
     }
-    log.debug("Event: {}", event);
+    log.debug("Event → {}", event);
     THREAD_POOL.execute(
         () -> {
           switch (event.getPostType()) {
@@ -84,6 +86,6 @@ public class EventHandler extends SimpleChannelInboundHandler<Event> {
   }
 
   private void unknownEvent(Event event) {
-    log.warn("未添加事件: {}", event);
+    log.debug("未添加事件: {}", event);
   }
 }

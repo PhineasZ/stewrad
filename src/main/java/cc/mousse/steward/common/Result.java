@@ -3,7 +3,6 @@ package cc.mousse.steward.common;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.val;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -23,25 +22,25 @@ public class Result {
   private Set<String> data;
 
   public static Result success(String name) {
-    val set = new HashSet<String>();
+    var set = new HashSet<String>();
     set.add(name);
     return new Result(Status.SUCCESS, Cause.SUCCESS, set);
   }
 
   public static Result fail(String name) {
-    val set = new HashSet<String>();
+    var set = new HashSet<String>();
     set.add(name);
     return new Result(Status.FAIL, Cause.FAIL, set);
   }
 
   public static Result playerNotFound(String name) {
-    val set = new HashSet<String>();
+    var set = new HashSet<String>();
     set.add(name);
     return new Result(Status.FAIL, Cause.PLAYER_NOT_FOUND, set);
   }
 
   public static Result whitelistAlreadyExists(String name) {
-    val set = new HashSet<String>();
+    var set = new HashSet<String>();
     set.add(name);
     return new Result(Status.FAIL, Cause.WHITELIST_ALREADY_EXISTS, set);
   }
@@ -51,7 +50,7 @@ public class Result {
   }
 
   public static Result outOfLimit(String name) {
-    val set = new HashSet<String>();
+    var set = new HashSet<String>();
     set.add(name);
     return new Result(Status.FAIL, Cause.OUT_OF_LIMIT, set);
   }

@@ -14,6 +14,12 @@ spring:
           username: root
           password: root
 
+logging:
+  level:
+    cc.mousse.steward: debug
+  file:
+    name: logs/steward.log
+
 steward:
   server:
     # 后端服务端口

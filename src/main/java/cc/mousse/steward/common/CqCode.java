@@ -1,7 +1,6 @@
 package cc.mousse.steward.common;
 
 import lombok.Data;
-import lombok.val;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,10 +31,10 @@ public class CqCode {
 
   @Override
   public String toString() {
-    StringBuilder builder = new StringBuilder();
+    var builder = new StringBuilder();
     builder.append("[CQ:").append(type.toString().toLowerCase()).append(",");
-    val entries = data.entrySet();
-    for (Map.Entry<String, String> entry : entries) {
+    var entries = data.entrySet();
+    for (var entry : entries) {
       builder.append(entry.getKey()).append("=").append(entry.getValue()).append(",");
     }
     builder.setCharAt(builder.length() - 1, ']');

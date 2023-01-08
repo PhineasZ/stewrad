@@ -13,7 +13,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -44,14 +43,14 @@ public class ApiUtil {
       throws JsonProcessingException, InterruptedException {
     MAPPER.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
     if (ctx == null) {
-      log.warn("ChannelHandlerContext为空");
+      log.error("ChannelHandlerContext为空");
       return new ArrayList<>();
     }
-    val params = new HashMap<String, String>(1);
+    var params = new HashMap<String, String>(1);
     params.put(GROUP_ID, groupId);
-    val echoId = sendRequest(ctx, new Api("get_group_member_list", params));
+    var echoId = sendRequest(ctx, new Api("get_group_member_list", params));
     // 转换data字段
-    val groupMembers =
+    var groupMembers =
         MAPPER.readValue(
             RECEIPT_MAP.get(echoId).getData().toString(), new TypeReference<List<GroupMember>>() {});
     RECEIPT_MAP.remove(echoId);
@@ -69,12 +68,12 @@ public class ApiUtil {
    */
   public GroupMember getGroupMemberInfo(ChannelHandlerContext ctx, String userId)
       throws JsonProcessingException, InterruptedException {
-    val params = new HashMap<String, String>(2);
+    var params = new HashMap<String, String>(2);
     params.put(GROUP_ID, config.getListenGroupId());
     params.put(USER_ID, userId);
-    val echoId = sendRequest(ctx, new Api("get_group_member_info", params));
+    var echoId = sendRequest(ctx, new Api("get_group_member_info", params));
     // 转换data字段
-    val groupMember = MAPPER.readValue(RECEIPT_MAP.get(echoId).getData().toString(), GroupMember.class);
+    var groupMember = MAPPER.readValue(RECEIPT_MAP.get(echoId).getData().toString(), GroupMember.class);
     RECEIPT_MAP.remove(echoId);
     return groupMember;
   }
@@ -89,11 +88,11 @@ public class ApiUtil {
    */
   public GroupMember getStrangerInfo(ChannelHandlerContext ctx, String userId)
       throws JsonProcessingException {
-    val params = new HashMap<String, String>(1);
+    var params = new HashMap<String, String>(1);
     params.put(USER_ID, userId);
-    val echoId = sendRequest(ctx, new Api("get_stranger_info", params));
+    var echoId = sendRequest(ctx, new Api("get_stranger_info", params));
     // 转换data字段
-    val groupMember = MAPPER.readValue(RECEIPT_MAP.get(echoId).getData().toString(), GroupMember.class);
+    var groupMember = MAPPER.readValue(RECEIPT_MAP.get(echoId).getData().toString(), GroupMember.class);
     RECEIPT_MAP.remove(echoId);
     return groupMember;
   }
@@ -108,7 +107,7 @@ public class ApiUtil {
    */
   public void setGroupCard(ChannelHandlerContext ctx, String userId, String card)
       throws JsonProcessingException {
-    val params = new HashMap<String, String>(2);
+    var params = new HashMap<String, String>(2);
     params.put(GROUP_ID, config.getListenGroupId());
     params.put(USER_ID, userId);
     params.put("card", card);
@@ -128,7 +127,7 @@ public class ApiUtil {
   public void setGroupAddRequest(
       ChannelHandlerContext ctx, String flag, String subType, Boolean approve, String reason)
       throws JsonProcessingException {
-    val params = new HashMap<String, String>(5);
+    var params = new HashMap<String, String>(5);
     params.put("flag", flag);
     params.put("sub_type", subType);
     params.put("approve", approve.toString());
@@ -156,7 +155,7 @@ public class ApiUtil {
    */
   public void sendAt(ChannelHandlerContext ctx, String message, String userId)
       throws JsonProcessingException {
-    val atCqCode = CqCode.at();
+    var atCqCode = CqCode.at();
     atCqCode.getData().put("qq", userId);
     sendGroupMsg(ctx, config.getListenGroupId(), atCqCode + message);
   }
@@ -199,10 +198,10 @@ public class ApiUtil {
   public void sendGroupReply(
       ChannelHandlerContext ctx, String groupId, String id, String message, String userId)
       throws JsonProcessingException {
-    val replyCqCode = CqCode.reply();
-    val replyData = replyCqCode.getData();
+    var replyCqCode = CqCode.reply();
+    var replyData = replyCqCode.getData();
     replyData.put("id", id);
-    val atCqCode = CqCode.at();
+    var atCqCode = CqCode.at();
     atCqCode.getData().put("qq", userId);
     sendGroupMsg(ctx, groupId, replyCqCode.toString() + atCqCode + message);
   }
@@ -217,8 +216,8 @@ public class ApiUtil {
    */
   public void sendGroupMsg(ChannelHandlerContext ctx, String groupId, String message)
       throws JsonProcessingException {
-    log.info("发送群消息：{}", message);
-    val params = new HashMap<String, String>(1);
+    log.debug("发送群消息 → {}", message);
+    var params = new HashMap<String, String>(1);
     params.put("group_id", groupId);
     params.put("message", message);
     params.put("auto_escape", "false");
@@ -237,13 +236,13 @@ public class ApiUtil {
    */
   private String sendRequest(ChannelHandlerContext ctx, Api api) throws JsonProcessingException {
     // 生成EchoId
-    val echoId = ECHO_PREFIX + UUID.randomUUID();
+    var echoId = ECHO_PREFIX + UUID.randomUUID();
     // 补充给bean对象
     api.setEcho(echoId);
     // 发送API
-    log.info("发送API: {}", echoId);
+    log.debug("发送API → {}", echoId);
     ctx.channel().writeAndFlush(new TextWebSocketFrame(MAPPER.writeValueAsString(api)));
-    val startWaitTs = System.currentTimeMillis();
+    var startWaitTs = System.currentTimeMillis();
     while (!RECEIPT_MAP.containsKey(echoId)) {
       try {
         Thread.sleep(100);
