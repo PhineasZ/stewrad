@@ -4,10 +4,7 @@ import cc.mousse.steward.common.Config;
 import cc.mousse.steward.common.Event;
 import cc.mousse.steward.common.Result;
 import cc.mousse.steward.domain.CacheWhitelist;
-import cc.mousse.steward.service.CacheWhitelistService;
-import cc.mousse.steward.service.GroupService;
-import cc.mousse.steward.service.PlayerService;
-import cc.mousse.steward.service.UserDataService;
+import cc.mousse.steward.service.*;
 import cc.mousse.steward.utils.ApiUtil;
 import cc.mousse.steward.utils.StrUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -34,6 +31,8 @@ public class GroupServiceImpl implements GroupService {
   @Resource private ApiUtil apiUtil;
 
   @Resource private StrUtil strUtil;
+
+  @Resource private CacheService cacheService;
 
   @Resource private PlayerService playerService;
 
@@ -121,7 +120,7 @@ public class GroupServiceImpl implements GroupService {
         putResults(results, Result.outOfLimit(illegalName));
       }
       var legalNames = names.get(0);
-      if (legalNames != null && legalNames.size() != 0) {
+      if (legalNames != null && !legalNames.isEmpty()) {
         // 存在有效角色名
         // 处理每个角色名
         for (var legalName : legalNames) {
@@ -147,7 +146,7 @@ public class GroupServiceImpl implements GroupService {
                 try {
                   apiUtil.sendLog(ctx, strUtil.getString("添加 [{}] 条白名单 → {}", data.size(), data));
                 } catch (JsonProcessingException e) {
-                  throw new RuntimeException(e);
+                  log.error(e.getMessage());
                 }
                 message = strUtil.splice(config.getSuccess(), data);
               }
@@ -167,7 +166,7 @@ public class GroupServiceImpl implements GroupService {
               apiUtil.sendGroupReply(
                   ctx, String.valueOf(event.getMessageId()), message, event.getUserId());
             } catch (JsonProcessingException e) {
-              throw new RuntimeException(e);
+              log.error(e.getMessage());
             }
           });
     } catch (InterruptedException e) {
@@ -238,7 +237,7 @@ public class GroupServiceImpl implements GroupService {
           try {
             apiUtil.sendLog(ctx, message);
           } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            log.error(e.getMessage());
           }
         });
   }
@@ -303,14 +302,14 @@ public class GroupServiceImpl implements GroupService {
                                 legalNameUserIdMap.get(name));
                           }
                         } catch (JsonProcessingException e) {
-                          throw new RuntimeException(e);
+                          log.error(e.getMessage());
                         }
                       });
                 }
                 default -> log.warn("未知分支");
               }
             } catch (JsonProcessingException e) {
-              throw new RuntimeException(e);
+              log.error(e.getMessage());
             }
           });
     } catch (InterruptedException e) {
@@ -361,6 +360,8 @@ public class GroupServiceImpl implements GroupService {
       var massage = strUtil.getString("自动为 \"{}\" [{}] 设置群名片", autoCard, event.getUserId());
       log.info(massage);
       apiUtil.sendLog(ctx, massage);
+      // 在cache中添加该玩家
+      cacheService.addOne(userId, autoCard);
     } catch (InterruptedException e) {
       log.error(e.getMessage());
       Thread.currentThread().interrupt();
@@ -388,7 +389,7 @@ public class GroupServiceImpl implements GroupService {
     try {
       if (WHITELIST.equals(event.getMessage())) {
         // 白名单请求
-        String message =
+        var message =
             strUtil.getString(
                 "\"{}\" [{}] 请求更新白名单", event.getSender().getCard(), event.getUserId());
         log.info(message);
@@ -430,15 +431,19 @@ public class GroupServiceImpl implements GroupService {
     if (!config.getListenGroupId().equals(event.getGroupId())) {
       return;
     }
-    String userId = event.getUserId();
-    String cardNew = event.getCardNew();
-    String cardOld = event.getCardOld();
-    String message = strUtil.getString("\"{}\" [{}] 更新群名片 → \"{}\"", cardOld, userId, cardNew);
-    log.info(message);
-    try {
-      apiUtil.sendLog(ctx, message);
-    } catch (JsonProcessingException e) {
-      log.error(e.getMessage());
+    // 解决自动设置群名片乱码问题
+    var userId = event.getUserId();
+    var cardNew = event.getCardNew();
+    var cardOld = cacheService.deleteOne(userId);
+    if (cardOld.isEmpty() || !Objects.equals(cardOld, cardNew)) {
+      // 不是自动设置，显示更新信息
+      var message = strUtil.getString("\"{}\" [{}] 更新群名片 → \"{}\"", cardOld, userId, cardNew);
+      log.info(message);
+      try {
+        apiUtil.sendLog(ctx, message);
+      } catch (JsonProcessingException e) {
+        log.error(e.getMessage());
+      }
     }
     flushWhitelist(ctx);
   }
@@ -494,10 +499,4 @@ public class GroupServiceImpl implements GroupService {
       Thread.currentThread().interrupt();
     }
   }
-
-  @Override
-  public void groupRecall(ChannelHandlerContext ctx, Event event) {}
-
-  @Override
-  public void groupUpload(ChannelHandlerContext ctx, Event event) {}
 }

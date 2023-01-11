@@ -37,6 +37,9 @@ public class Config {
   @Value("${steward.server.report-group.id}")
   private String reportGroupId;
 
+  @Value("${steward.server.cache-path}")
+  private String cachePath;
+
   @Value("${steward.message.success}")
   private String success;
 

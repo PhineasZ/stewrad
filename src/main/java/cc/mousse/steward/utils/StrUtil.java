@@ -57,7 +57,7 @@ public class StrUtil {
     }
     return names;
   }
-  
+
   public String getString(String s, Object... args) {
     var res = new StringBuilder();
     var idx = 0;

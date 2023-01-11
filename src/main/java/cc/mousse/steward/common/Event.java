@@ -92,8 +92,7 @@ public class Event {
   /** 荣誉类型 */
   @JsonProperty("honor_type")
   private String honorType;
-  /** 文件信息 */
-  private File file;
+
   /** 入群邀请者id */
   @JsonProperty("invitor_id")
   private String invitorId;

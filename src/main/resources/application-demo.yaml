@@ -44,6 +44,8 @@ steward:
     report-group:
       # 群号码
       id:
+    # 缓存路径
+    cache-path: /home/minecraft/robot/steward/cache.json
   # 管理群的返回消息，$为替换符号
   message:
     # 白名单添加成功
